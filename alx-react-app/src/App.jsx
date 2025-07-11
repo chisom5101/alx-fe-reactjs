@@ -7,7 +7,8 @@ import Header from './Header'
 import MainContent from './MainContent'
 import Footer from './Footer'
 
-function App(<WelcomeMessage />) {
+function App(<WelcomeMessage />
+<Header/> <MainContent/> <Footer/>)  {
   const [count, setCount] = useState(0)
 
   return (
