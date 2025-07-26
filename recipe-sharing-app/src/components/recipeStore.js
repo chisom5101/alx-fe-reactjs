@@ -4,6 +4,7 @@ export const useRecipeStore = create((set) => ({
   recipes: [],
   favorites: [],
   recommendations: [],
+  searchTerm: "",  // Added searchTerm state
 
   // Actions
   setRecipes: (newRecipes) => set(() => ({ recipes: newRecipes })),
@@ -40,4 +41,7 @@ export const useRecipeStore = create((set) => ({
       );
       return { recommendations: recommended };
     }),
+
+  // Added search functionality
+  setSearchTerm: (term) => set(() => ({ searchTerm: term })),
 }));
