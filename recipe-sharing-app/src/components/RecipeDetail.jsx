@@ -1,4 +1,4 @@
-import { useRecipeStore } from "./recipeStore";
+import { useRecipeStore } from "./store/RecipeStore";
 import EditRecipeForm from "./EditRecipeForm";
 import DeleteRecipeButton from "./DeleteRecipeButton";
 import { useParams } from "react-router-dom";
@@ -21,4 +21,4 @@ const RecipeDetails = () => {
   );
 };
 
-export default RecipeDetails;
+export default RecipeDetail;

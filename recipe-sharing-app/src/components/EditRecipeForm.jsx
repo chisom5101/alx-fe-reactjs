@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRecipeStore } from "./recipeStore";
+import { useRecipeStore } from "./store/RecipeStore";
 
 const EditRecipeForm = ({ recipe, onFinish }) => {
   const updateRecipe = useRecipeStore((state) => state.updateRecipe);
@@ -7,15 +7,13 @@ const EditRecipeForm = ({ recipe, onFinish }) => {
   const [description, setDescription] = useState(recipe.description);
 
   const handleSubmit = (event) => {
-    event.preventDefault(); // ✅ This line is required
-
+    event.preventDefault();
     updateRecipe({
       ...recipe,
       title,
       description,
     });
-
-    if (onFinish) onFinish(); // optional callback to close form or rerender
+    if (onFinish) onFinish();
   };
 
   return (
