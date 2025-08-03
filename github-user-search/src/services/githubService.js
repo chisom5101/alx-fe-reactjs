@@ -1,68 +1,34 @@
-const API_BASE_URL = "https://api.github.com";
+import axios from 'axios';
 
-/**
- * Fetches basic data for a single GitHub user
- * @param {string} username - GitHub username to search for
- * @returns {Promise<Object>} User data object
- */
-export const fetchUserData = async (username) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/users/${username}`);
-    
-    if (!response.ok) {
-      throw new Error(`User not found: ${username}`);
+const fetchUserData = async ({ username, location, minRepos }) => {
+  let queryParts = [];
+
+  if (username) queryParts.push(`${username} in:login`);
+  if (location) queryParts.push(`location:${location}`);
+  if (minRepos) queryParts.push(`repos:>=${minRepos}`);
+
+  const query = queryParts.join(' ');
+  const url = `https://api.github.com/search/users?q=${encodeURIComponent(query)}`;
+
+  const response = await axios.get(url, {
+    headers: {
+      Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`
     }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-    throw error;
-  }
-};
+  });
 
-/**
- * Performs an advanced search for GitHub users with multiple filters
- * @param {string} username - Username to search
- * @param {string} location - Location filter
- * @param {number} minRepos - Minimum repositories filter
- * @returns {Promise<Array>} Array of user objects
- */
-export const fetchAdvancedUserSearch = async (username, location, minRepos) => {
-  // Construct the query string
-  let query = `${username} in:login`;
-  if (location) query += ` location:${location}`;
-  if (minRepos) query += ` repos:>${minRepos}`;
+  const users = response.data.items;
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/search/users?q=${encodeURIComponent(query)}&per_page=10`,
-      {
+  const fullDetails = await Promise.all(
+    users.map(user =>
+      axios.get(`https://api.github.com/users/${user.login}`, {
         headers: {
-          'Accept': 'application/vnd.github.v3+json'
+          Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`
         }
-      }
-    );
+      }).then(res => res.data)
+    )
+  );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to search users');
-    }
-
-    const data = await response.json();
-    
-    // If no results found
-    if (!data.items || data.items.length === 0) {
-      return [];
-    }
-
-    // Fetch detailed information for each user
-    const detailedUsers = await Promise.all(
-      data.items.map(user => fetchUserData(user.login))
-    );
-
-    return detailedUsers;
-  } catch (error) {
-    console.error('Error in advanced search:', error);
-    throw error;
-  }
+  return fullDetails;
 };
+
+export default fetchUserData;
