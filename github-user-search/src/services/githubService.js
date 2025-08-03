@@ -1,113 +1,112 @@
-import React, { useState } from "react";
-import {
-  fetchUserData,
-  fetchAdvancedUserSearch,
-} from "../services/githubService";
+// Results.jsx
+import { useState, useEffect } from 'react';
 
-const Search = () => {
-  const [username, setUsername] = useState("");
-  const [location, setLocation] = useState("");
-  const [minRepos, setMinRepos] = useState("");
+export default function Results({ data }) {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setUsers([]);
+  useEffect(() => {
+    if (data) {
+      setUsers(data.items);
+      setPage(1);
+    }
+  }, [data]);
 
+  const loadMore = async () => {
+    if (!data || !data.items || isLoadingMore) return;
+    
+    setIsLoadingMore(true);
     try {
-      let results;
-
-      // Use advanced search only if location or minRepos are provided
-      if (location.trim() !== "" || minRepos.trim() !== "") {
-        results = await fetchAdvancedUserSearch(username, location, minRepos);
-      } else {
-        const user = await fetchUserData(username);
-        results = [user]; // Wrap single user in array
-      }
-
-      setUsers(results);
+      const nextPage = page + 1;
+      const response = await searchUsers({
+        ...queryParams,
+        page: nextPage
+      });
+      
+      setUsers(prev => [...prev, ...response.items]);
+      setPage(nextPage);
     } catch (err) {
-      console.error(err);
-      setError("Looks like we can't find the user");
+      console.error('Error loading more users:', err);
     } finally {
-      setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
-  return (
-    <div className="max-w-2xl mx-auto p-6">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 bg-white shadow-md rounded-xl p-6"
-      >
-        <h2 className="text-xl font-semibold text-gray-800">
-          GitHub User Search
-        </h2>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Location (optional)"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="number"
-          placeholder="Minimum Repositories (optional)"
-          value={minRepos}
-          onChange={(e) => setMinRepos(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Search
-        </button>
-      </form>
+  if (!users || users.length === 0) {
+    return (
+      <div className="mt-8 text-center text-gray-500">
+        No users found. Try adjusting your search criteria.
+      </div>
+    );
+  }
 
-      <div className="mt-6">
-        {loading && <p className="text-gray-600">Loading...</p>}
-        {error && <p className="text-red-600">{error}</p>}
-        <ul className="space-y-4">
-          {users.map((user) => (
-            <li
-              key={user.id}
-              className="border p-4 rounded-md shadow flex items-center space-x-4"
-            >
+  return (
+    <div className="mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {users.map((user) => (
+          <div key={user.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="flex items-center space-x-4 mb-4">
               <img
                 src={user.avatar_url}
-                alt={user.login}
-                className="w-12 h-12 rounded-full"
+                alt={`${user.login}'s avatar`}
+                className="w-16 h-16 rounded-full"
               />
               <div>
-                <p className="font-semibold">{user.login}</p>
-                <a
-                  href={user.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  View Profile
-                </a>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  <a 
+                    href={user.html_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:text-indigo-600"
+                  >
+                    {user.login}
+                  </a>
+                </h3>
+                {user.name && <p className="text-gray-600">{user.name}</p>}
               </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+            
+            <div className="space-y-2 text-sm text-gray-700">
+              {user.location && (
+                <p className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {user.location}
+                </p>
+              )}
+              
+              <p className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Repositories: {user.public_repos || 0}
+              </p>
+              
+              <p className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Followers: {user.followers || 0} • Following: {user.following || 0}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {data && data.total_count > users.length && (
+        <div className="mt-8 text-center">
+          <button
+            onClick={loadMore}
+            disabled={isLoadingMore}
+            className="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoadingMore ? 'Loading...' : 'Load More'}
+          </button>
+        </div>
+      )}
     </div>
   );
-};
-
-export default Search;
+}
