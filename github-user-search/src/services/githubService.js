@@ -1,3 +1,55 @@
+// githubServices.js
+const API_URL = 'https://api.github.com/search/users';
+
+export const searchUsers = async (queryParams) => {
+  const { username, location, minRepos, language } = queryParams;
+  
+  // Construct the query string based on provided parameters
+  let query = '';
+  
+  if (username) query += `${username} in:login`;
+  if (location) query += ` location:${location}`;
+  if (minRepos) query += ` repos:>${minRepos}`;
+  if (language) query += ` language:${language}`;
+  
+  const response = await fetch(`${API_URL}?q=${encodeURIComponent(query.trim())}&per_page=20`, {
+    headers: {
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch users');
+  }
+
+  const data = await response.json();
+  
+  // Fetch additional details for each user (optional)
+  const usersWithDetails = await Promise.all(
+    data.items.map(async (user) => {
+      const userDetails = await fetch(user.url, {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }).then(res => res.json());
+      
+      return {
+        ...user,
+        name: userDetails.name,
+        location: userDetails.location,
+        public_repos: userDetails.public_repos,
+        followers: userDetails.followers,
+        following: userDetails.following
+      };
+    })
+  );
+
+  return {
+    ...data,
+    items: usersWithDetails
+  };
+};
 // Results.jsx
 import { useState, useEffect } from 'react';
 
