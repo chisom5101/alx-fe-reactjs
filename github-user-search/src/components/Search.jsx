@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { fetchAdvancedUserSearch } from "../services/githubService";
+import { fetchUserData } from "../services/githubService";
 
 const Search = () => {
   const [username, setUsername] = useState("");
-  const [location, setLocation] = useState("");
-  const [minRepos, setMinRepos] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -14,15 +12,12 @@ const Search = () => {
     setLoading(true);
     setError("");
     try {
-      const results = await fetchAdvancedUserSearch(
-        username,
-        location,
-        minRepos
-      );
-      setUsers(results);
+      const user = await fetchUserData(username);
+      setUsers([user]);
     } catch (err) {
       console.error(err);
       setError("Looks like we cant find the user");
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -35,27 +30,13 @@ const Search = () => {
         className="space-y-4 bg-white shadow-md rounded-xl p-6"
       >
         <h2 className="text-xl font-semibold text-gray-800">
-          GitHub Advanced User Search
+          GitHub User Search
         </h2>
         <input
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="text"
-          placeholder="Location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="number"
-          placeholder="Minimum Repositories"
-          value={minRepos}
-          onChange={(e) => setMinRepos(e.target.value)}
           className="w-full border p-2 rounded"
         />
         <button
