@@ -24,7 +24,3 @@ dist-ssr
 *.sw?
 .env
 .env*
-<<<<<<< HEAD
-=======
-
->>>>>>> 99fdec6 (tailwindcss)
