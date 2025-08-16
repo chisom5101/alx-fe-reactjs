@@ -5,7 +5,6 @@ export default function HomePage() {
   const [recipesData, setRecipesData] = useState([]);
 
   useEffect(() => {
-    // Fetch the local JSON file
     fetch("/data.json")
       .then((response) => response.json())
       .then((data) => setRecipesData(data))
@@ -13,7 +12,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {recipesData.map((recipe) => (
         <Link to={/recipe/${recipe.id}} key={recipe.id}>
           <div className="bg-white rounded-lg shadow hover:shadow-lg transition">
