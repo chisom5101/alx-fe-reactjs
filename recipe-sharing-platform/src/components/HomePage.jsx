@@ -1,12 +1,21 @@
-
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import recipesData from "../data.json";
 
 export default function HomePage() {
+  const [recipesData, setRecipesData] = useState([]);
+
+  useEffect(() => {
+    // Fetch the local JSON file
+    fetch("/data.json")
+      .then((response) => response.json())
+      .then((data) => setRecipesData(data))
+      .catch((error) => console.error("Error loading recipes:", error));
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {recipesData.map((recipe) => (
-        <Link to={`/recipe/${recipe.id}`} key={recipe.id}>
+        <Link to={/recipe/${recipe.id}} key={recipe.id}>
           <div className="bg-white rounded-lg shadow hover:shadow-lg transition">
             <img
               src={recipe.image}
