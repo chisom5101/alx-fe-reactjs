@@ -1,46 +1,51 @@
 import { useState } from "react";
 
 export default function RegistrationForm() {
-  // State for inputs
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState(""); // 👈 renamed
 
-  // State for errors
-  const [error, setError] = useState("");
-
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validation rules
-    if (!username || !email || !password) {
-      setError("⚠ All fields are required!");
+    // Basic validation (separate if checks)
+    if (!username) {
+      setErrors("⚠ Username is required");
       return;
     }
 
+    if (!email) {
+      setErrors("⚠ Email is required");
+      return;
+    }
+
+    if (!password) {
+      setErrors("⚠ Password is required");
+      return;
+    }
+
+    // Extended validation
     if (username.length < 3) {
-      setError("⚠ Username must be at least 3 characters long.");
+      setErrors("⚠ Username must be at least 3 characters long.");
       return;
     }
 
-    // Simple email regex pattern
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      setError("⚠ Please enter a valid email address.");
+      setErrors("⚠ Please enter a valid email address.");
       return;
     }
 
     if (password.length < 6) {
-      setError("⚠ Password must be at least 6 characters long.");
+      setErrors("⚠ Password must be at least 6 characters long.");
       return;
     }
 
-    // If validation passes
-    setError("");
+    // If everything is valid
+    setErrors("");
     console.log("✅ Form Submitted:", { username, email, password });
 
-    // Clear form
     setUsername("");
     setEmail("");
     setPassword("");
@@ -50,10 +55,9 @@ export default function RegistrationForm() {
     <div className="p-4 max-w-sm mx-auto border rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-4">User Registration</h2>
 
-      {error && <p className="text-red-500 mb-2">{error}</p>}
+      {errors && <p className="text-red-500 mb-2">{errors}</p>}
 
       <form onSubmit={handleSubmit}>
-        {/* Username */}
         <div className="mb-3">
           <label className="block font-medium mb-1">Username:</label>
           <input
@@ -64,7 +68,6 @@ export default function RegistrationForm() {
           />
         </div>
 
-        {/* Email */}
         <div className="mb-3">
           <label className="block font-medium mb-1">Email:</label>
           <input
@@ -75,7 +78,6 @@ export default function RegistrationForm() {
           />
         </div>
 
-        {/* Password */}
         <div className="mb-3">
           <label className="block font-medium mb-1">Password:</label>
           <input
