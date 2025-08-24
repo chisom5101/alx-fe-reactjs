@@ -11,17 +11,34 @@ export default function RegistrationForm() {
 
   // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault(); // prevent page refresh
+    e.preventDefault();
 
-    // Basic validation
+    // Validation rules
     if (!username || !email || !password) {
-      setError("All fields are required!");
+      setError("⚠ All fields are required!");
+      return;
+    }
+
+    if (username.length < 3) {
+      setError("⚠ Username must be at least 3 characters long.");
+      return;
+    }
+
+    // Simple email regex pattern
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setError("⚠ Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("⚠ Password must be at least 6 characters long.");
       return;
     }
 
     // If validation passes
     setError("");
-    console.log("Form Submitted:", { username, email, password });
+    console.log("✅ Form Submitted:", { username, email, password });
 
     // Clear form
     setUsername("");
