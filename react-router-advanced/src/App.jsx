@@ -1,60 +1,42 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Home from "./components/Home";
+import Profile from "./components/Profile";
+import BlogPost from "./components/BlogPost";
+import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-import Home from "./pages/Home.jsx";
-import Blog from "./pages/Blog.jsx";
-import BlogPost from "./pages/BlogPost.jsx";
-import Profile from "./pages/Profile.jsx";
-import ProfileDetails from "./pages/ProfileDetails.jsx";
-import ProfileSettings from "./pages/ProfileSettings.jsx";
-import Login from "./pages/Login.jsx";
-import NotFound from "./pages/NotFound.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-
-export default function App() {
-  // Are we logged in? (false = not logged in)
-  const [isAuthed, setIsAuthed] = useState(false);
-
+function App() {
   return (
-    <BrowserRouter>
-      {/* Simple top menu */}
-      <nav style={{ display: "flex", gap: 12, padding: 12 }}>
-        <Link to="/">Home</Link>
-        <Link to="/blog">Blog</Link>
-        <Link to="/profile">Profile</Link>
-        {!isAuthed ? (
-          <Link to="/login">Login</Link>
-        ) : (
-          <button onClick={() => setIsAuthed(false)}>Log out</button>
-        )}
-      </nav>
-
+    <Router>
       <Routes>
-        {/* Normal rooms */}
         <Route path="/" element={<Home />} />
-        <Route path="blog" element={<Blog />} />
-        {/* Magic room name (dynamic) */}
-        <Route path="blog/:id" element={<BlogPost />} />
 
-        {/* Rooms with a bouncer */}
-        <Route element={<ProtectedRoute isAuthed={isAuthed} />}>
-          {/* Profile is a room that has its own rooms (nested) */}
-          <Route path="profile" element={<Profile />}>
-            <Route index element={<ProfileDetails />} />
-            <Route path="details" element={<ProfileDetails />} />
-            <Route path="settings" element={<ProfileSettings />} />
-          </Route>
-        </Route>
+        {/* Dynamic route for blog posts */}
+        <Route path="/blog/:id" element={<BlogPost />} />
 
-        {/* Login + 404 */}
+        {/* Protected route for Profile */}
         <Route
-          path="login"
+          path="/profile/*"
           element={
-            <Login onLogin={() => setIsAuthed(true)} isAuthed={isAuthed} />
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           }
         />
-        <Route path="*" element={<NotFound />} />
+
+        {/* Login page */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Fallback for unknown paths */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
+
+export default App;
